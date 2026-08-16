@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Daily Task Tracker</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand-block">
+          <div class="brand-mark">✓</div>
+          <div>
+            <p class="eyebrow">Productivity</p>
+            <h2>TaskFlow</h2>
+          </div>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Main navigation">
+          <button class="nav-item active" data-view="dashboard">
+            <span>Dashboard</span>
+          </button>
+          <button class="nav-item" data-view="today">
+            <span>Today</span>
+          </button>
+          <button class="nav-item" data-view="yesterday">
+            <span>Yesterday</span>
+          </button>
+          <button class="nav-item" data-view="tomorrow">
+            <span>Tomorrow</span>
+          </button>
+          <button class="nav-item" data-view="calendar">
+            <span>Calendar</span>
+          </button>
+          <button class="nav-item" data-view="statistics">
+            <span>Statistics</span>
+          </button>
+          <button class="nav-item" data-view="settings">
+            <span>Settings</span>
+          </button>
+        </nav>
+
+        <div class="sidebar-footer">
+          <button id="resetDataBtn" class="danger-btn full-width">Reset all data</button>
+        </div>
+      </aside>
+
+      <main class="main-panel">
+        <header class="topbar">
+          <div class="topbar-left">
+            <button id="mobileNavToggle" class="icon-btn mobile-only" aria-label="Toggle sidebar">☰</button>
+            <div>
+              <p class="eyebrow">Overview</p>
+              <h1 id="pageTitle">Dashboard</h1>
+            </div>
+          </div>
+
+          <div class="topbar-actions">
+            <button id="addTaskBtn" class="primary-btn">+ Add Task</button>
+            <button id="exportBtn" class="secondary-btn">Export JSON</button>
+            <button id="importBtn" class="secondary-btn">Import JSON</button>
+            <input id="importFileInput" type="file" accept="application/json" hidden />
+            <button id="themeToggle" class="icon-btn" aria-label="Toggle theme">🌙</button>
+          </div>
+        </header>
+
+        <section class="dashboard-cards">
+          <article class="stat-card accent">
+            <div class="card-header">
+              <span class="card-label">Today's date</span>
+            </div>
+            <h3 id="todayDateLabel">--</h3>
+          </article>
+
+          <article class="stat-card">
+            <div class="card-header">
+              <span class="card-label">Total tasks</span>
+            </div>
+            <h3 id="totalTasksToday">0</h3>
+          </article>
+
+          <article class="stat-card success">
+            <div class="card-header">
+              <span class="card-label">Completed</span>
+            </div>
+            <h3 id="completedTasksToday">0</h3>
+          </article>
+
+          <article class="stat-card warning">
+            <div class="card-header">
+              <span class="card-label">Remaining</span>
+            </div>
+            <h3 id="remainingTasksToday">0</h3>
+          </article>
+
+          <article class="stat-card highlight">
+            <div class="card-header">
+              <span class="card-label">Today progress</span>
+            </div>
+            <div class="mini-progress-wrap">
+              <div id="todayProgressBar" class="mini-progress-bar"><span></span></div>
+              <strong id="todayProgressText">0%</strong>
+            </div>
+          </article>
+        </section>
+
+        <section class="content-grid">
+          <div class="panel task-panel">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Task overview</p>
+                <h2>Tasks</h2>
+              </div>
+              <div class="date-tabs" aria-label="Date navigation">
+                <button class="date-tab active" data-date-type="today">Today</button>
+                <button class="date-tab" data-date-type="yesterday">Yesterday</button>
+                <button class="date-tab" data-date-type="tomorrow">Tomorrow</button>
+              </div>
+            </div>
+
+            <div class="date-controls">
+              <label class="date-picker-wrap">
+                <span>Select date</span>
+                <input id="datePicker" type="date" />
+              </label>
+            </div>
+
+            <div class="toolbar">
+              <label class="search-wrap">
+                <span>Search</span>
+                <input id="searchInput" type="search" placeholder="Search tasks..." />
+              </label>
+
+              <label class="filter-wrap">
+                <span>Status</span>
+                <select id="statusFilter">
+                  <option value="all">All</option>
+                  <option value="completed">Completed</option>
+                  <option value="incomplete">Incomplete</option>
+                </select>
+              </label>
+
+              <label class="filter-wrap">
+                <span>Priority</span>
+                <select id="priorityFilter">
+                  <option value="all">All</option>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </label>
+
+              <label class="filter-wrap">
+                <span>Category</span>
+                <select id="categoryFilter">
+                  <option value="all">All</option>
+                  <option value="Study">Study</option>
+                  <option value="Personal">Personal</option>
+                  <option value="Work">Work</option>
+                  <option value="Exercise">Exercise</option>
+                  <option value="Project">Project</option>
+                  <option value="Other">Other</option>
+                </select>
+              </label>
+
+              <label class="filter-wrap">
+                <span>Sort</span>
+                <select id="sortFilter">
+                  <option value="date-desc">Newest first</option>
+                  <option value="date-asc">Oldest first</option>
+                  <option value="priority-high">Priority: High</option>
+                  <option value="priority-low">Priority: Low</option>
+                  <option value="time-asc">Time</option>
+                </select>
+              </label>
+            </div>
+
+            <div id="taskList" class="task-list" aria-live="polite"></div>
+          </div>
+
+          <aside class="panel analytics-panel">
+            <div class="panel-header compact">
+              <div>
+                <p class="eyebrow">Insights</p>
+                <h2>Productivity</h2>
+              </div>
+            </div>
+
+            <div class="chart-stack">
+              <div class="chart-card">
+                <div class="chart-header">
+                  <h3>Daily productivity</h3>
+                  <span id="dailyChartLabel" class="chart-label">Last 7 days</span>
+                </div>
+                <canvas id="dailyChart" height="220"></canvas>
+              </div>
+
+              <div class="chart-card">
+                <div class="chart-header">
+                  <h3>Weekly completion</h3>
+                  <span class="chart-label">Current month</span>
+                </div>
+                <canvas id="weeklyChart" height="200"></canvas>
+              </div>
+
+              <div class="chart-card">
+                <div class="chart-header">
+                  <h3>Monthly completion</h3>
+                  <span class="chart-label">Last 6 months</span>
+                </div>
+                <canvas id="monthlyChart" height="200"></canvas>
+              </div>
+
+              <div class="chart-card">
+                <div class="chart-header">
+                  <h3>Completed vs incomplete</h3>
+                  <span class="chart-label">All time</span>
+                </div>
+                <canvas id="taskSplitChart" height="200"></canvas>
+              </div>
+            </div>
+          </aside>
+        </section>
+
+        <section class="bottom-grid">
+          <div class="panel calendar-panel">
+            <div class="panel-header compact">
+              <div>
+                <p class="eyebrow">Calendar</p>
+                <h2>Productivity view</h2>
+              </div>
+            </div>
+            <div class="calendar-header">
+              <button id="prevMonthBtn" class="icon-btn" aria-label="Previous month">←</button>
+              <h3 id="calendarMonthLabel">Month</h3>
+              <button id="nextMonthBtn" class="icon-btn" aria-label="Next month">→</button>
+            </div>
+            <div class="calendar-weekdays">
+              <span>Sun</span>
+              <span>Mon</span>
+              <span>Tue</span>
+              <span>Wed</span>
+              <span>Thu</span>
+              <span>Fri</span>
+              <span>Sat</span>
+            </div>
+            <div id="calendarGrid" class="calendar-grid"></div>
+          </div>
+
+          <div class="panel summary-panel">
+            <div class="panel-header compact">
+              <div>
+                <p class="eyebrow">Overall</p>
+                <h2>Summary</h2>
+              </div>
+            </div>
+
+            <div class="summary-stack">
+              <div class="summary-item">
+                <span>Overall completion</span>
+                <strong id="overallCompletionValue">0%</strong>
+              </div>
+              <div class="progress-track">
+                <span id="overallCompletionBar"></span>
+              </div>
+
+              <div class="summary-item">
+                <span>Progress label</span>
+                <strong id="progressLabelText">Low progress</strong>
+              </div>
+
+              <div class="summary-item">
+                <span>Total tracked tasks</span>
+                <strong id="totalTrackedTasksValue">0</strong>
+              </div>
+
+              <div class="summary-item">
+                <span>Completed tasks</span>
+                <strong id="completedTrackedTasksValue">0</strong>
+              </div>
+
+              <div class="summary-item">
+                <span>Incomplete tasks</span>
+                <strong id="incompleteTrackedTasksValue">0</strong>
+              </div>
+
+              <div class="summary-item">
+                <span>Daily goal</span>
+                <strong id="dailyGoalValue">0/0</strong>
+              </div>
+
+              <div class="summary-item">
+                <span>Productivity score</span>
+                <strong id="productivityScoreValue">0</strong>
+              </div>
+
+              <div class="summary-item">
+                <span>Current streak</span>
+                <strong id="streakValue">0 days</strong>
+              </div>
+
+              <div class="settings-block">
+                <h3>Settings</h3>
+                <label>
+                  <span>Daily task goal</span>
+                  <input id="settingsGoal" type="number" min="1" max="50" value="8" />
+                </label>
+                <label>
+                  <span>Default priority</span>
+                  <select id="settingsPriority">
+                    <option value="low">Low</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="high">High</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Default category</span>
+                  <select id="settingsCategory">
+                    <option value="Study">Study</option>
+                    <option value="Personal">Personal</option>
+                    <option value="Work">Work</option>
+                    <option value="Exercise">Exercise</option>
+                    <option value="Project">Project</option>
+                    <option value="Other" selected>Other</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Time format</span>
+                  <select id="settingsTimeFormat">
+                    <option value="24h" selected>24-hour</option>
+                    <option value="12h">12-hour</option>
+                  </select>
+                </label>
+                <label class="checkbox-row">
+                  <input id="settingsConfirmDelete" type="checkbox" checked />
+                  <span>Confirm before deleting</span>
+                </label>
+                <button id="saveSettingsBtn" class="primary-btn" type="button">Save settings</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div id="taskModal" class="modal hidden" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="taskModalTitle">
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow">Task form</p>
+            <h3 id="taskModalTitle">Add task</h3>
+          </div>
+          <button id="closeTaskModalBtn" class="icon-btn" aria-label="Close form">×</button>
+        </div>
+
+        <form id="taskForm">
+          <input id="taskId" type="hidden" />
+
+          <label>
+            <span>Task name</span>
+            <input id="taskTitle" type="text" maxlength="120" placeholder="Example: Design landing page" required />
+          </label>
+
+          <label>
+            <span>Description</span>
+            <textarea id="taskDescription" rows="4" maxlength="500" placeholder="Optional notes or details"></textarea>
+          </label>
+
+          <div class="form-row">
+            <label>
+              <span>Date</span>
+              <input id="taskDate" type="date" required />
+            </label>
+
+            <label>
+              <span>Priority</span>
+              <select id="taskPriority">
+                <option value="low">Low</option>
+                <option value="medium" selected>Medium</option>
+                <option value="high">High</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="form-row">
+            <label>
+              <span>Category</span>
+              <select id="taskCategory">
+                <option value="Study">Study</option>
+                <option value="Personal">Personal</option>
+                <option value="Work">Work</option>
+                <option value="Exercise">Exercise</option>
+                <option value="Project">Project</option>
+                <option value="Other" selected>Other</option>
+                <option value="custom">Custom...</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Repeat</span>
+              <select id="taskRecurrence">
+                <option value="none">None</option>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+              </select>
+            </label>
+          </div>
+
+          <label id="customCategoryWrap" class="hidden">
+            <span>Custom category</span>
+            <input id="taskCustomCategory" type="text" maxlength="40" placeholder="Enter a custom category" />
+          </label>
+
+          <div class="form-row">
+            <label>
+              <span>Start time</span>
+              <input id="taskStartTime" type="time" />
+            </label>
+
+            <label>
+              <span>Due time</span>
+              <input id="taskDueTime" type="time" />
+            </label>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" id="cancelTaskBtn" class="secondary-btn">Cancel</button>
+            <button type="submit" class="primary-btn">Save task</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <aside id="taskDetailsPanel" class="details-panel hidden" aria-live="polite">
+      <div class="details-header">
+        <h3>Task details</h3>
+        <button id="closeDetailsBtn" class="icon-btn" aria-label="Close task details">×</button>
+      </div>
+      <div id="taskDetailsContent" class="details-content"></div>
+    </aside>
+
+    <div id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+
+    <script type="module" src="database.js"></script>
+    <script type="module" src="charts.js"></script>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
